@@ -74,18 +74,41 @@ client.once("ready", () => {
   });
 });
 
-client.on("guildMemberAdd", (member) => {
-  const channel = member.guild.channels.cache.find((ch) => ch.name === "joins");
-  if (!channel) return;
+client.on('guildMemberAdd', async member => {
+  const guild = member.guild;
+  const executiveRoleId = '980269921982349372';
+  const categoryId = '1092229237580239033';
+
+  const ticketName = `ticket-${member.user.username}`;
+
+  const channel = await guild.channels.create(ticketName, {
+    type: 'text',
+    parent: categoryId,
+    permissionOverwrites: [
+      {
+        id: guild.roles.everyone.id,
+        deny: ['VIEW_CHANNEL'],
+      },
+      {
+        id: member.id,
+        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'],
+      },
+      {
+        id: executiveRoleId,
+        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'],
+      },
+    ],
+  });
+
+  await channel.send(`||<@&${executiveRoleId}>|| \n\nWelcome to the Tech Optimum Staff Team, **${member}**. \nPlease state your role and department in this channel.`);
+
+  const joinChannel = member.guild.channels.cache.find(ch => ch.name === 'joins');
+  if (!joinChannel) return;
   const embed = new Discord.MessageEmbed()
-    .setAuthor(
-      member.user.username,
-      member.user.displayAvatarURL(),
-      member.user.displayAvatarURL()
-    )
+    .setAuthor(member.user.username, member.user.displayAvatarURL(), member.user.displayAvatarURL())
     .setDescription(`**${member.user.username}** has joined our staff team.`)
-    .setColor("#7289DA");
-  channel.send(embed);
+    .setColor('#7289DA');
+  joinChannel.send(embed);
 });
 
 // new command (-resources
@@ -243,10 +266,16 @@ client.on("message", (message) => {
   if (message.content === "-help") {
     const embed = new Discord.MessageEmbed()
       .setTitle("Help Menu")
+      
       .setDescription("Here are the available commands:")
+
       .addField("`-suggest`", "Suggest an improvement for Tech Optimum.")
       .addField("`-staff`", "View the list of all staff members.")
+      .addField("-help", "View this menu.")
+      .addField("`-ticket`", "Create a ticket.")
+      .addField("-announce", "Announce something to the staff server.")
       .setColor("#7289DA")
+
       .setFooter(
         `Requested by ${message.author.username}`,
         message.author.displayAvatarURL()
