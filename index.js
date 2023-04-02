@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const config = require('./config.json')
 const client = new Discord.Client();
 const cron = require("node-cron");
 const prefix = '.';
@@ -8,9 +7,6 @@ const snippetsFilePath = './snippets.json';
 const express = require('express')
 const app = express()
 const port = 3000
-
-// Define an empty object to hold the snippets
-let snippets = {};
 
 
 app.get('/', (req, res) => {
@@ -109,47 +105,6 @@ client.on("message", message => {
   }
 });
 
-// new COMMAND, snippets
-if (fs.existsSync('./snippets.json')) {
-  snippets = JSON.parse(fs.readFileSync('./snippets.json'));
-}
-
-client.on('message', message => {
-  if (message.content.startsWith(prefix)) {
-    const args = message.content.slice(prefix.length).trim().match(/\[.+?]/g).map(arg => arg.slice(1, -1));
-    const command = args.shift().toLowerCase();
-
-    if (command === 'snippet-create') {
-      const content = args.shift();
-      const name = args.shift();
-
-      if (content && name) {
-        const variables = content.match(/{\w+}/g) || [];
-
-        snippets[name] = { content, variables };
-
-        fs.writeFileSync('./snippets.json', JSON.stringify(snippets, null, 2));
-
-        message.channel.send(`Snippet "${name}" created.`);
-      } else {
-        message.channel.send('Invalid arguments. Usage: .snippet-create [content] [name]');
-      }
-    } else {
-      const snippet = snippets[command];
-      if (snippet) {
-        let response = snippet.content;
-
-        snippet.variables.forEach(variable => {
-          const varName = variable.slice(1, -1);
-          const arg = args.shift() || '';
-          response = response.replace(variable, arg);
-        });
-
-        message.channel.send(response);
-      }
-    }
-  }
-});
 
 
 
