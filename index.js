@@ -7,7 +7,25 @@ const snippetsFilePath = './snippets.json';
 const express = require('express')
 const app = express()
 const port = 3000
+const { MessageButton, MessageActionRow } = require("discord-buttons");
 
+
+const executiveRoleID = '980269921982349372';
+
+const departments = [
+  { name: 'HR', categoryId: '1062188743664078978' },
+  { name: 'Marketing & Design', categoryId: '980266883339153428' },
+  { name: 'Education', categoryId: '1008138129913413663' },
+  { name: 'Development & Tech', categoryId: '961852518630047785' },
+  { name: "Hackathon", categoryId: "980268143031246878"},
+  { name: "Community", categoryId: "982348540846174220"},
+  { name: "Executives", categoryId: "998782484676350032"},
+  
+];
+
+const logChannelId = "1091976378372591726";
+
+require("discord-buttons")(client);
 
 app.get('/', (req, res) => {
   res.send('the bot is online')
@@ -37,6 +55,23 @@ client.on('guildMemberAdd', member => {
     .setColor('#7289DA')
   channel.send(embed);
 });
+
+// new command (-resources 
+client.on("message", (message) => {
+  if (message.content === "-resources") {
+    const embed = new Discord.MessageEmbed()
+      .setTitle("Tech Optimum Staff Resources")
+       .setDescription("[Staff Handbook](https://techoptimum.notion.site/Staff-Handbook-afb659f99c614c1baad74adc18bf2def) \n [Volunteer Benefits](https://techoptimum.notion.site/Volunteer-Benefits-at-Tech-Optimum-18b3263dda344832a8df1687df92a8f4)" )
+
+      .setColor("#0099ff")
+      .setFooter(`Requested by ${message.author.username}`, message.author.displayAvatarURL());
+
+  
+
+    message.channel.send(embed);
+  }
+});
+
 // new command (-members)
 client.on('message', message => {
   if (message.content === '-staff') {
@@ -60,8 +95,8 @@ client.on('message', message => {
 
 // new command, (requesting features)
 client.on("message", message => {
-  if (message.content.startsWith("-requestfeature")) {
-    message.channel.send("What feature would you like to request? Please be specific, at least 2 sentences.");
+  if (message.content.startsWith("-suggest")) {
+    message.channel.send("What would you like to suggest? Please be specific, at least 2 sentences.");
     const filter1 = m => m.author.id === message.author.id;
     message.channel.awaitMessages(filter1, { max: 1, time: 60000, errors: ["time"] })
       .then(collected1 => {
@@ -78,12 +113,12 @@ client.on("message", message => {
                 const difficulty = collected3.first().content;
                 message.channel.send("Requested sent to <#1084366838328217650> to be voted on.");
                 const requestEmbed = new Discord.MessageEmbed()
-                  .setTitle("Feature Request")
-                  .addField("Feature:", feature)
+                  .setTitle("New Suggestion")
+                  .addField("Suggestion:", feature)
                   .addField("Priority:", priority)
                   .addField("Difficulty:", difficulty)
                   .setTimestamp()
-                  .setFooter(`Feature suggested by ${message.author.username}`, message.author.displayAvatarURL());
+                  .setFooter(`Suggested by ${message.author.username}`, message.author.displayAvatarURL());
                 const requestChannel = client.channels.cache.get("1084366838328217650");
                 requestChannel.send(requestEmbed)
                   .then(sentMessage => {
@@ -113,7 +148,7 @@ client.on('message', message => {
     const embed = new Discord.MessageEmbed()
       .setTitle("Help Menu")
       .setDescription("Here are the available commands:")
-      .addField("`-requestfeature`", "Request a new feature or suggest an improvement for Tech Optimum.")
+      .addField("`-suggest`", "Suggest an improvement for Tech Optimum.")
       .addField("`-staff`", "View the list of all staff members.")
       .setColor("#7289DA")
       .setFooter(`Requested by ${message.author.username}`, message.author.displayAvatarURL());
@@ -123,8 +158,105 @@ client.on('message', message => {
 
 
 
+client.on("message", async (message) => {
+  if (message.content === "-ticket") {
+    const rows = [
+      new MessageActionRow(),
+      new MessageActionRow(),
+    ];
 
-// new code
+    departments.forEach((department, index) => {
+      const button = new MessageButton()
+        .setLabel(department.name)
+        .setStyle("green")
+        .setID(`create_ticket_${department.name.toLowerCase()}`);
+
+      // If there are more than 5 departments, put the remaining buttons in the second row
+      if (index < 4) {
+        rows[0].addComponent(button);
+      } else {
+        rows[1].addComponent(button);
+      }
+    });
+
+    const embed = new Discord.MessageEmbed()
+      .setTitle("Private Discussions")
+      .setDescription(
+        `Hello! Welcome to **Private Discussions**. This is a place where you can discuss staff-related things within Tech Optimum. Please choose the appropriate department you would like to create a discussion in.`
+      )
+      .setFooter("Please do not create more than 1 discussion at a time.")
+      .setColor("#7289DA");
+
+    await message.channel.send(embed, {
+      components: rows,
+    });
+  }
+});
+
+
+client.on('clickButton', async (button) => {
+  const department = departments.find((department) =>
+    button.id.startsWith(`create_ticket_${department.name.toLowerCase()}`)
+  );
+
+  if (department) {
+    const guild = button.guild;
+    const member = button.clicker.member;
+    const ticketName = `ticket-${department.name}-${member.user.username}`;
+
+    if (guild.channels.cache.find((channel) => channel.name === ticketName)) {
+      return button.reply.send('You already have an open ticket!', true);
+    }
+
+    guild.channels
+      .create(ticketName, {
+        type: 'text',
+        parent: department.categoryId,
+        permissionOverwrites: [
+          {
+            id: guild.roles.everyone.id,
+            deny: ['VIEW_CHANNEL'],
+          },
+          {
+            id: member.id,
+            allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'],
+          },
+        ],
+      })
+      .then(async (channel) => {
+        const closeTicketButton = new MessageButton()
+          .setLabel('Close Ticket')
+          .setStyle('red')
+          .setID('close_ticket');
+
+        const row = new MessageActionRow().addComponent(closeTicketButton);
+
+        await channel.send(
+          `||@everyone|| \n\nWelcome, **${member}** to your private discussion! \n  > The executives and directors of the **${department.name} Department** can now privately chat here with you for the  department here. `,
+          { components: [row] }
+        );
+      });
+
+    button.reply.send('Your ticket has been created!', true);
+  } else if (button.id === 'close_ticket') {
+    const channel = button.channel;
+
+    // Save a transcript of the ticket
+    const transcriptChannel = button.guild.channels.cache.get(logChannelId);
+    let transcript = `**Transcript for ${channel.name}**\n\n`;
+
+    const fetchedMessages = await channel.messages.fetch({ limit: 100 });
+    fetchedMessages.forEach((message) => {
+      transcript += `${message.author.username}: ${message.content}\n`;
+    });
+
+    await transcriptChannel.send(`\`\`\`${transcript}\`\`\``);
+
+    // Close the ticket
+    channel.delete();
+  }
+});
+
 
 
 
