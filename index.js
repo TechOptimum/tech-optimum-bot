@@ -13,15 +13,15 @@ const { MessageButton, MessageActionRow } = require("discord-buttons");
 const executiveRoleID = '980269921982349372';
 
 const departments = [
-  { name: 'HR', categoryId: '1062188743664078978' },
-  { name: 'Marketing & Design', categoryId: '980266883339153428' },
-  { name: 'Education', categoryId: '1008138129913413663' },
-  { name: 'Development & Tech', categoryId: '961852518630047785' },
-  { name: "Hackathon", categoryId: "980268143031246878"},
-  { name: "Community", categoryId: "982348540846174220"},
-  { name: "Executives", categoryId: "998782484676350032"},
-  
+  { name: 'HR', categoryId: '1062188743664078978', whitelistRoleId: '1092215687788904640' },
+  { name: 'Marketing & Design', categoryId: '980266883339153428', whitelistRoleId: '1092215799676141660' },
+  { name: 'Education', categoryId: '1008138129913413663', whitelistRoleId: '1092215841250103376' },
+  { name: 'Development & Tech', categoryId: '961852518630047785', whitelistRoleId: '1092215873466544159' },
+  { name: "Hackathon", categoryId: "980268143031246878", whitelistRoleId: '1092215929292722176' },
+  { name: "Community", categoryId: "982348540846174220", whitelistRoleId: '1092215768067870730' },
+  { name: "Executives", categoryId: "998782484676350032", whitelistRoleId: "1092215929292722176" },
 ];
+
 
 const logChannelId = "1091976378372591726";
 
@@ -240,20 +240,24 @@ client.on('clickButton', async (button) => {
     }
 
     guild.channels
-      .create(ticketName, {
-        type: 'text',
-        parent: department.categoryId,
-        permissionOverwrites: [
-          {
-            id: guild.roles.everyone.id,
-            deny: ['VIEW_CHANNEL'],
-          },
-          {
-            id: member.id,
-            allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'],
-          },
-        ],
-      })
+     .create(ticketName, {
+    type: 'text',
+    parent: department.categoryId,
+    permissionOverwrites: [
+      {
+        id: guild.roles.everyone.id,
+        deny: ['VIEW_CHANNEL'],
+      },
+      {
+        id: member.id,
+        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'],
+      },
+      {
+        id: department.whitelistRoleId,
+        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'],
+      },
+    ],
+  })
       .then(async (channel) => {
         const closeTicketButton = new MessageButton()
           .setLabel('Close Ticket')
