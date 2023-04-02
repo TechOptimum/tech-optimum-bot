@@ -354,4 +354,52 @@ client.on("clickButton", async (button) => {
   }
 });
 
+client.on("message", async (message) => {
+  if (message.content.startsWith("-announce")) {
+    // Check for admin permissions
+    if (!message.member.permissions.has("ADMINISTRATOR")) {
+      return message.channel.send("You don't have the required permissions to use this command.");
+    }
+
+    message.channel.send("What would you like to announce?");
+
+    const filter = (m) => m.author.id === message.author.id;
+
+    try {
+      const announcement = await message.channel.awaitMessages(filter, { max: 1, time: 60000, errors: ["time"] });
+      const announcementText = announcement.first().content;
+
+      message.channel.send("In which channel would you like to announce? (Mention the channel)");
+
+      const targetChannel = await message.channel.awaitMessages(filter, { max: 1, time: 60000, errors: ["time"] });
+      const channelMention = targetChannel.first().mentions.channels.first();
+
+      if (!channelMention) {
+        return message.channel.send("No channel mentioned. Please try again.");
+      }
+
+      message.channel.send("Which roles should be pinged? (Mention the roles or type 'none' for no pings)");
+
+      const rolesToPing = await message.channel.awaitMessages(filter, { max: 1, time: 60000, errors: ["time"] });
+      let rolePings = "";
+
+      if (rolesToPing.first().content.toLowerCase() !== "none") {
+        rolePings = rolesToPing.first().mentions.roles.map((role) => `<@&${role.id}>`).join(" ");
+      }
+
+      const embed = new Discord.MessageEmbed()
+        .setDescription(announcementText)
+        .setFooter(`Announcement by ${message.author.username}`, message.author.displayAvatarURL())
+        .setColor("#0099ff");
+
+      channelMention.send(`${rolePings}\n`, embed);
+      message.channel.send("Announcement sent!");
+
+    } catch (error) {
+      message.channel.send("You didn't provide the required input in time. Please try again.");
+    }
+  }
+});
+
+
 client.login(process.env.TOKEN);
