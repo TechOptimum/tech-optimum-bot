@@ -1,72 +1,107 @@
-const Discord = require('discord.js');
+const Discord = require("discord.js");
 const client = new Discord.Client();
 const cron = require("node-cron");
-const prefix = '.';
-const fs = require('fs');
-const snippetsFilePath = './snippets.json';
-const express = require('express')
-const app = express()
-const port = 3000
+const prefix = ".";
+const fs = require("fs");
+const snippetsFilePath = "./snippets.json";
+const express = require("express");
+const app = express();
+const port = 3000;
 const { MessageButton, MessageActionRow } = require("discord-buttons");
 
+require("dotenv").config();
 
-const executiveRoleID = '980269921982349372';
+const executiveRoleID = "980269921982349372";
 
 const departments = [
-  { name: 'HR', categoryId: '1062188743664078978', whitelistRoleId: '1092215687788904640' },
-  { name: 'Marketing & Design', categoryId: '980266883339153428', whitelistRoleId: '1092215799676141660' },
-  { name: 'Education', categoryId: '1008138129913413663', whitelistRoleId: '1092215841250103376' },
-  { name: 'Development & Tech', categoryId: '961852518630047785', whitelistRoleId: '1092215873466544159' },
-  { name: "Hackathon", categoryId: "980268143031246878", whitelistRoleId: '1092215929292722176' },
-  { name: "Community", categoryId: "982348540846174220", whitelistRoleId: '1092215768067870730' },
-  { name: "Executives", categoryId: "998782484676350032", whitelistRoleId: "1092215929292722176" },
+  {
+    name: "HR",
+    categoryId: "1062188743664078978",
+    whitelistRoleId: "1092215687788904640",
+  },
+  {
+    name: "Marketing & Design",
+    categoryId: "980266883339153428",
+    whitelistRoleId: "1092215799676141660",
+  },
+  {
+    name: "Education",
+    categoryId: "1008138129913413663",
+    whitelistRoleId: "1092215841250103376",
+  },
+  {
+    name: "Development & Tech",
+    categoryId: "961852518630047785",
+    whitelistRoleId: "1092215873466544159",
+  },
+  {
+    name: "Hackathon",
+    categoryId: "980268143031246878",
+    whitelistRoleId: "1092215929292722176",
+  },
+  {
+    name: "Community",
+    categoryId: "982348540846174220",
+    whitelistRoleId: "1092215768067870730",
+  },
+  {
+    name: "Executives",
+    categoryId: "998782484676350032",
+    whitelistRoleId: "1092215929292722176",
+  },
 ];
-
 
 const logChannelId = "1091976378372591726";
 
 require("discord-buttons")(client);
 
-app.get('/', (req, res) => {
-  res.send('the bot is online')
-})
+app.get("/", (req, res) => {
+  res.send("the bot is online");
+});
 
 app.listen(port, () => {
-  console.log(`Tech Optimum bot app listening on port ${port}`)
-})
+  console.log(`Tech Optimum bot app listening on port ${port}`);
+});
 
-client.once('ready', () => {
-  console.log(`Ready`)
+client.once("ready", () => {
+  console.log(`Ready`);
   client.user.setPresence({
     status: "online",
     activity: {
       name: "with code",
-      type: "PLAYING"
-    }
+      type: "PLAYING",
+    },
   });
 });
 
-client.on('guildMemberAdd', member => {
-  const channel = member.guild.channels.cache.find(ch => ch.name === 'joins');
+client.on("guildMemberAdd", (member) => {
+  const channel = member.guild.channels.cache.find((ch) => ch.name === "joins");
   if (!channel) return;
   const embed = new Discord.MessageEmbed()
-    .setAuthor(member.user.username, member.user.displayAvatarURL(), member.user.displayAvatarURL())
+    .setAuthor(
+      member.user.username,
+      member.user.displayAvatarURL(),
+      member.user.displayAvatarURL()
+    )
     .setDescription(`**${member.user.username}** has joined our staff team.`)
-    .setColor('#7289DA')
+    .setColor("#7289DA");
   channel.send(embed);
 });
 
-// new command (-resources 
+// new command (-resources
 client.on("message", (message) => {
   if (message.content === "-resources") {
     const embed = new Discord.MessageEmbed()
       .setTitle("Tech Optimum Staff Resources")
-       .setDescription("[Staff Handbook](https://techoptimum.notion.site/Staff-Handbook-afb659f99c614c1baad74adc18bf2def) \n [Volunteer Benefits](https://techoptimum.notion.site/Volunteer-Benefits-at-Tech-Optimum-18b3263dda344832a8df1687df92a8f4)" )
+      .setDescription(
+        "[Staff Handbook](https://techoptimum.notion.site/Staff-Handbook-afb659f99c614c1baad74adc18bf2def) \n [Volunteer Benefits](https://techoptimum.notion.site/Volunteer-Benefits-at-Tech-Optimum-18b3263dda344832a8df1687df92a8f4)"
+      )
 
       .setColor("#0099ff")
-      .setFooter(`Requested by ${message.author.username}`, message.author.displayAvatarURL());
-
-  
+      .setFooter(
+        `Requested by ${message.author.username}`,
+        message.author.displayAvatarURL()
+      );
 
     message.channel.send(embed);
   }
@@ -76,8 +111,8 @@ client.on("message", (message) => {
 client.on("message", (message) => {
   if (message.content === "-serverinfo") {
     const embed = new Discord.MessageEmbed()
-      .setTitle('Server Information')
-      .setColor('#7289DA')
+      .setTitle("Server Information")
+      .setColor("#7289DA")
       .setDescription(
         `
 
@@ -94,107 +129,135 @@ client.on("message", (message) => {
         [**Our Community Server**](https://discord.gg/HpRfm7kp3U)`
       );
 
-   
-   
-
-  
-
     message.channel.send(embed);
   }
-})
+});
 
 // new command (-members)
-client.on('message', message => {
-  if (message.content === '-staff') {
-    let roles = message.guild.roles.cache.sort((a, b) => b.position - a.position);
+client.on("message", (message) => {
+  if (message.content === "-staff") {
+    let roles = message.guild.roles.cache.sort(
+      (a, b) => b.position - a.position
+    );
     let totalMembers = message.guild.memberCount;
-    let embed = new Discord.MessageEmbed()
-      .setAuthor(`We have ${totalMembers} staff members in Tech Optimum.`)
-    roles.forEach(role => {
-      if (role.name === "@everyone" || role.name === "Ticket Tool" || role.name === "carl-bot" || role.name === "Tech Optimum Test Bot" || role.name === "Staff Member" || role.name === "Admin") return;
-      let membersWithRole = message.guild.members.cache.filter(member => member.roles.cache.has(role.id));
-      let memberList = membersWithRole.map(member => `<@${member.id}>`).join(', ');
+    let embed = new Discord.MessageEmbed().setAuthor(
+      `We have ${totalMembers} staff members in Tech Optimum.`
+    );
+    roles.forEach((role) => {
+      if (
+        role.name === "@everyone" ||
+        role.name === "Ticket Tool" ||
+        role.name === "carl-bot" ||
+        role.name === "Tech Optimum Test Bot" ||
+        role.name === "Staff Member" ||
+        role.name === "Admin"
+      )
+        return;
+      let membersWithRole = message.guild.members.cache.filter((member) =>
+        member.roles.cache.has(role.id)
+      );
+      let memberList = membersWithRole
+        .map((member) => `<@${member.id}>`)
+        .join(", ");
       if (memberList) {
-        embed.addField(role.name, memberList)
-        embed.setFooter(`${message.author.username}`, message.author.displayAvatarURL());
+        embed.addField(role.name, memberList);
+        embed.setFooter(
+          `${message.author.username}`,
+          message.author.displayAvatarURL()
+        );
       }
     });
     message.channel.send({ embed });
   }
 });
 
-
 // new command, (requesting features)
-client.on("message", message => {
+client.on("message", (message) => {
   if (message.content.startsWith("-suggest")) {
-    message.channel.send("What would you like to suggest? Please be specific, at least 2 sentences.");
-    const filter1 = m => m.author.id === message.author.id;
-    message.channel.awaitMessages(filter1, { max: 1, time: 60000, errors: ["time"] })
-      .then(collected1 => {
+    message.channel.send(
+      "What would you like to suggest? Please be specific, at least 2 sentences."
+    );
+    const filter1 = (m) => m.author.id === message.author.id;
+    message.channel
+      .awaitMessages(filter1, { max: 1, time: 60000, errors: ["time"] })
+      .then((collected1) => {
         const feature = collected1.first().content;
-        message.channel.send("What is the priority of this request? (Low, Medium, High)");
-        const filter2 = m => m.author.id === message.author.id;
-        message.channel.awaitMessages(filter2, { max: 1, time: 60000, errors: ["time"] })
-          .then(collected2 => {
+        message.channel.send(
+          "What is the priority of this request? (Low, Medium, High)"
+        );
+        const filter2 = (m) => m.author.id === message.author.id;
+        message.channel
+          .awaitMessages(filter2, { max: 1, time: 60000, errors: ["time"] })
+          .then((collected2) => {
             const priority = collected2.first().content;
-            message.channel.send("How difficult is this request? (Easy, Medium, or Hard)");
-            const filter3 = m => m.author.id === message.author.id;
-            message.channel.awaitMessages(filter3, { max: 1, time: 60000, errors: ["time"] })
-              .then(collected3 => {
+            message.channel.send(
+              "How difficult is this request? (Easy, Medium, or Hard)"
+            );
+            const filter3 = (m) => m.author.id === message.author.id;
+            message.channel
+              .awaitMessages(filter3, { max: 1, time: 60000, errors: ["time"] })
+              .then((collected3) => {
                 const difficulty = collected3.first().content;
-                message.channel.send("Requested sent to <#1084366838328217650> to be voted on.");
+                message.channel.send(
+                  "Requested sent to <#1084366838328217650> to be voted on."
+                );
                 const requestEmbed = new Discord.MessageEmbed()
                   .setTitle("New Suggestion")
                   .addField("Suggestion:", feature)
                   .addField("Priority:", priority)
                   .addField("Difficulty:", difficulty)
                   .setTimestamp()
-                  .setFooter(`Suggested by ${message.author.username}`, message.author.displayAvatarURL());
-                const requestChannel = client.channels.cache.get("1084366838328217650");
-                requestChannel.send(requestEmbed)
-                  .then(sentMessage => {
-                    sentMessage.react("👍");
-                    sentMessage.react("👎");
-                  });
+                  .setFooter(
+                    `Suggested by ${message.author.username}`,
+                    message.author.displayAvatarURL()
+                  );
+                const requestChannel = client.channels.cache.get(
+                  "1084366838328217650"
+                );
+                requestChannel.send(requestEmbed).then((sentMessage) => {
+                  sentMessage.react("👍");
+                  sentMessage.react("👎");
+                });
               })
-              .catch(collected3 => {
-                message.channel.send("You did not provide any input. Please try again.");
+              .catch((collected3) => {
+                message.channel.send(
+                  "You did not provide any input. Please try again."
+                );
               });
           })
-          .catch(collected2 => {
-            message.channel.send("You did not provide any input. Please try again.");
+          .catch((collected2) => {
+            message.channel.send(
+              "You did not provide any input. Please try again."
+            );
           });
       })
-      .catch(collected1 => {
-        message.channel.send("You did not provide any input. Please try again.");
+      .catch((collected1) => {
+        message.channel.send(
+          "You did not provide any input. Please try again."
+        );
       });
   }
 });
 
-
-
-
-client.on('message', message => {
-  if (message.content === '-help') {
+client.on("message", (message) => {
+  if (message.content === "-help") {
     const embed = new Discord.MessageEmbed()
       .setTitle("Help Menu")
       .setDescription("Here are the available commands:")
       .addField("`-suggest`", "Suggest an improvement for Tech Optimum.")
       .addField("`-staff`", "View the list of all staff members.")
       .setColor("#7289DA")
-      .setFooter(`Requested by ${message.author.username}`, message.author.displayAvatarURL());
+      .setFooter(
+        `Requested by ${message.author.username}`,
+        message.author.displayAvatarURL()
+      );
     message.channel.send(embed);
   }
 });
 
-
-
 client.on("message", async (message) => {
   if (message.content === "-ticket") {
-    const rows = [
-      new MessageActionRow(),
-      new MessageActionRow(),
-    ];
+    const rows = [new MessageActionRow(), new MessageActionRow()];
 
     departments.forEach((department, index) => {
       const button = new MessageButton()
@@ -224,8 +287,7 @@ client.on("message", async (message) => {
   }
 });
 
-
-client.on('clickButton', async (button) => {
+client.on("clickButton", async (button) => {
   const department = departments.find((department) =>
     button.id.startsWith(`create_ticket_${department.name.toLowerCase()}`)
   );
@@ -236,33 +298,33 @@ client.on('clickButton', async (button) => {
     const ticketName = `ticket-${department.name}-${member.user.username}`;
 
     if (guild.channels.cache.find((channel) => channel.name === ticketName)) {
-      return button.reply.send('You already have an open ticket!', true);
+      return button.reply.send("You already have an open ticket!", true);
     }
 
     guild.channels
-     .create(ticketName, {
-    type: 'text',
-    parent: department.categoryId,
-    permissionOverwrites: [
-      {
-        id: guild.roles.everyone.id,
-        deny: ['VIEW_CHANNEL'],
-      },
-      {
-        id: member.id,
-        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'],
-      },
-      {
-        id: department.whitelistRoleId,
-        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'],
-      },
-    ],
-  })
+      .create(ticketName, {
+        type: "text",
+        parent: department.categoryId,
+        permissionOverwrites: [
+          {
+            id: guild.roles.everyone.id,
+            deny: ["VIEW_CHANNEL"],
+          },
+          {
+            id: member.id,
+            allow: ["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY"],
+          },
+          {
+            id: department.whitelistRoleId,
+            allow: ["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY"],
+          },
+        ],
+      })
       .then(async (channel) => {
         const closeTicketButton = new MessageButton()
-          .setLabel('Close Ticket')
-          .setStyle('red')
-          .setID('close_ticket');
+          .setLabel("Close Ticket")
+          .setStyle("red")
+          .setID("close_ticket");
 
         const row = new MessageActionRow().addComponent(closeTicketButton);
 
@@ -272,8 +334,8 @@ client.on('clickButton', async (button) => {
         );
       });
 
-    button.reply.send('Your ticket has been created!', true);
-  } else if (button.id === 'close_ticket') {
+    button.reply.send("Your ticket has been created!", true);
+  } else if (button.id === "close_ticket") {
     const channel = button.channel;
 
     // Save a transcript of the ticket
@@ -292,10 +354,4 @@ client.on('clickButton', async (button) => {
   }
 });
 
-
-
-
-
-
-
-client.login(process.env.TOKEN)
+client.login(process.env.TOKEN);
