@@ -72,6 +72,37 @@ client.on("message", (message) => {
   }
 });
 
+//server info command
+client.on("message", (message) => {
+  if (message.content === "-serverinfo") {
+    const embed = new Discord.MessageEmbed()
+      .setTitle('Server Information')
+      .setColor('#7289DA')
+      .setDescription(
+        `
+
+        This server is a staff server for all the different departments of tech optimum. In this server, we have staff members from the Web Development, Graphic Design, Hackathon, HR, Discord Bot Development and Discord Moderation teams. 
+        
+        **Main Channels**
+        > <#961850793202450435> - Used for communication within all departments. 
+        > <#1010003919776264313> - Used for voice communication within all departments.
+        
+        If you have any questions, please feel free to reach out to anyone on the <@&980269921982349372>
+        
+      [**Staff Info**](https://techoptimum.notion.site/Staff-Handbook-afb659f99c614c1baad74adc18bf2def)
+       [**Volunteer Hours Form**](https://forms.gle/P3R9RqvncZsT3tYv6)    
+        [**Our Community Server**](https://discord.gg/HpRfm7kp3U)`
+      );
+
+   
+   
+
+  
+
+    message.channel.send(embed);
+  }
+})
+
 // new command (-members)
 client.on('message', message => {
   if (message.content === '-staff') {
@@ -256,6 +287,8 @@ client.on('clickButton', async (button) => {
     channel.delete();
   }
 });
+
+
 
 
 
