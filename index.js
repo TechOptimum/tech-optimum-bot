@@ -271,9 +271,9 @@ client.on("message", (message) => {
 
       .addField("`-suggest`", "Suggest an improvement for Tech Optimum.")
       .addField("`-staff`", "View the list of all staff members.")
-      .addField("-help", "View this menu.")
+      .addField("`-help`", "View this menu.")
       .addField("`-ticket`", "Create a ticket.")
-      .addField("-announce", "Announce something to the staff server.")
+      .addField("`-announce`", "Announce something to the staff server.")
       .setColor("#7289DA")
 
       .setFooter(
@@ -426,6 +426,86 @@ client.on("message", async (message) => {
 
     } catch (error) {
       message.channel.send("You didn't provide the required input in time. Please try again.");
+    }
+  }
+});
+
+
+client.on("message", async (message) => {
+  if (message.content === "-reactionroles") {
+    const timezoneRoles = [
+      { name: "MDT", roleId: "1092232749353541752" },
+      { name: "EST", roleId: "1092232764327202876" },
+      { name: "CST", roleId: "1092232773894418444" },
+      { name: "PST", roleId: "1092232794287116298" },
+      { name: "GMT", roleId: "1092232987854258266" },
+      { name: "IST", roleId: "1092232783386128394" },
+    ];
+
+    const gradeLevelRoles = [
+      { name: "9th Grade", roleId: "1092233044905181384" },
+      { name: "10th Grade", roleId: "1092233411214712913" },
+      { name: "11th Grade", roleId: "1092233422056988752" },
+      { name: "12th Grade", roleId: "1092233965202591756" },
+      { name: "College", roleId: "1092233983401656330"}
+    ];
+
+    const embed = new Discord.MessageEmbed()
+      .setTitle("Customize your roles")
+      .setDescription(
+        "Select your timezone and grade level below to get the appropriate roles."
+      )
+      
+      .setColor("#0099ff")
+      .setFooter(
+        `Only select your timezone and grade level once.`,
+      );
+
+      const timezoneButtons = timezoneRoles.map((role) => {
+        return new MessageButton()
+          .setLabel(role.name)
+          .setStyle("PRIMARY")
+          .setID(`timezone_${role.roleId}`);
+      });
+  
+      const gradeLevelButtons = gradeLevelRoles.map((role) => {
+        return new MessageButton()
+          .setLabel(role.name)
+          .setStyle("PRIMARY")
+          .setID(`grade_${role.roleId}`);
+      });
+  
+      const timezoneActionRows = [];
+      const gradeLevelActionRows = [];
+  
+      for (let i = 0; i < timezoneButtons.length; i += 3) {
+        const row = new MessageActionRow().addComponents(timezoneButtons.slice(i, i + 3));
+        timezoneActionRows.push(row);
+      }
+  
+      for (let i = 0; i < gradeLevelButtons.length; i += 5) {
+        const row = new MessageActionRow().addComponents(gradeLevelButtons.slice(i, i + 5));
+        gradeLevelActionRows.push(row);
+      }
+  
+      await message.channel.send({
+        embed: embed,
+        components: [...timezoneActionRows, ...gradeLevelActionRows],
+      });
+    }
+  });
+client.on("clickButton", async (button) => {
+  const [type, roleId] = button.id.split("_");
+  const member = button.message.guild.members.cache.get(button.clicker.user.id);
+
+  if (type === "timezone" || type === "grade") {
+    const role = button.message.guild.roles.cache.get(roleId);
+    if (member.roles.cache.has(roleId)) {
+      await member.roles.remove(role);
+      await button.reply.send(`Removed the ${role.name} role.`, true);
+    } else {
+      await member.roles.add(role);
+      await button.reply.send(`Assigned the ${role.name} role.`, true);
     }
   }
 });
