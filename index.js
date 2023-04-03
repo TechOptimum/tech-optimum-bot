@@ -74,40 +74,48 @@ client.once("ready", () => {
   });
 });
 
-client.on('guildMemberAdd', async member => {
+client.on("guildMemberAdd", async (member) => {
   const guild = member.guild;
-  const executiveRoleId = '980269921982349372';
-  const categoryId = '1092229237580239033';
+  const executiveRoleId = "980269921982349372";
+  const categoryId = "1092229237580239033";
 
   const ticketName = `verification-${member.user.username}`;
 
   const channel = await guild.channels.create(ticketName, {
-    type: 'text',
+    type: "text",
     parent: categoryId,
     permissionOverwrites: [
       {
         id: guild.roles.everyone.id,
-        deny: ['VIEW_CHANNEL'],
+        deny: ["VIEW_CHANNEL"],
       },
       {
         id: member.id,
-        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'],
+        allow: ["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY"],
       },
       {
         id: executiveRoleId,
-        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'],
+        allow: ["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY"],
       },
     ],
   });
 
-  await channel.send(`||<@&${executiveRoleId}>|| \n\nWelcome to the Tech Optimum Staff Team, **${member}**. \nPlease state your role and department in this channel.`);
+  await channel.send(
+    `||<@&${executiveRoleId}>|| \n\nWelcome to the Tech Optimum Staff Team, **${member}**. \nPlease state your role and department in this channel.`
+  );
 
-  const joinChannel = member.guild.channels.cache.find(ch => ch.name === 'joins');
+  const joinChannel = member.guild.channels.cache.find(
+    (ch) => ch.name === "joins"
+  );
   if (!joinChannel) return;
   const embed = new Discord.MessageEmbed()
-    .setAuthor(member.user.username, member.user.displayAvatarURL(), member.user.displayAvatarURL())
+    .setAuthor(
+      member.user.username,
+      member.user.displayAvatarURL(),
+      member.user.displayAvatarURL()
+    )
     .setDescription(`**${member.user.username}** has joined our staff team.`)
-    .setColor('#7289DA');
+    .setColor("#7289DA");
   joinChannel.send(embed);
 });
 
@@ -147,6 +155,7 @@ client.on("message", (message) => {
         
         If you have any questions, please feel free to reach out to anyone on the <@&980269921982349372>
         
+        **Important Links**
       [**Staff Info**](https://techoptimum.notion.site/Staff-Handbook-afb659f99c614c1baad74adc18bf2def)
        [**Volunteer Hours Form**](https://forms.gle/P3R9RqvncZsT3tYv6)    
         [**Our Community Server**](https://discord.gg/HpRfm7kp3U)`
@@ -266,7 +275,7 @@ client.on("message", (message) => {
   if (message.content === "-help") {
     const embed = new Discord.MessageEmbed()
       .setTitle("Help Menu")
-      
+
       .setDescription("Here are the available commands:")
 
       .addField("`-suggest`", "Suggest an improvement for Tech Optimum.")
@@ -387,7 +396,9 @@ client.on("message", async (message) => {
   if (message.content.startsWith("-announce")) {
     // Check for admin permissions
     if (!message.member.permissions.has("ADMINISTRATOR")) {
-      return message.channel.send("You don't have the required permissions to use this command.");
+      return message.channel.send(
+        "You don't have the required permissions to use this command."
+      );
     }
 
     message.channel.send("What would you like to announce?");
@@ -395,41 +406,63 @@ client.on("message", async (message) => {
     const filter = (m) => m.author.id === message.author.id;
 
     try {
-      const announcement = await message.channel.awaitMessages(filter, { max: 1, time: 60000, errors: ["time"] });
+      const announcement = await message.channel.awaitMessages(filter, {
+        max: 1,
+        time: 60000,
+        errors: ["time"],
+      });
       const announcementText = announcement.first().content;
 
-      message.channel.send("In which channel would you like to announce? (Mention the channel)");
+      message.channel.send(
+        "In which channel would you like to announce? (Mention the channel)"
+      );
 
-      const targetChannel = await message.channel.awaitMessages(filter, { max: 1, time: 60000, errors: ["time"] });
+      const targetChannel = await message.channel.awaitMessages(filter, {
+        max: 1,
+        time: 60000,
+        errors: ["time"],
+      });
       const channelMention = targetChannel.first().mentions.channels.first();
 
       if (!channelMention) {
         return message.channel.send("No channel mentioned. Please try again.");
       }
 
-      message.channel.send("Which roles should be pinged? (Mention the roles or type 'none' for no pings)");
+      message.channel.send(
+        "Which roles should be pinged? (Mention the roles or type 'none' for no pings)"
+      );
 
-      const rolesToPing = await message.channel.awaitMessages(filter, { max: 1, time: 60000, errors: ["time"] });
+      const rolesToPing = await message.channel.awaitMessages(filter, {
+        max: 1,
+        time: 60000,
+        errors: ["time"],
+      });
       let rolePings = "";
 
       if (rolesToPing.first().content.toLowerCase() !== "none") {
-        rolePings = rolesToPing.first().mentions.roles.map((role) => `<@&${role.id}>`).join(" ");
+        rolePings = rolesToPing
+          .first()
+          .mentions.roles.map((role) => `<@&${role.id}>`)
+          .join(" ");
       }
 
       const embed = new Discord.MessageEmbed()
         .setDescription(announcementText)
-        .setFooter(`Announcement by ${message.author.username}`, message.author.displayAvatarURL())
+        .setFooter(
+          `Announcement by ${message.author.username}`,
+          message.author.displayAvatarURL()
+        )
         .setColor("#0099ff");
 
       channelMention.send(`${rolePings}\n`, embed);
       message.channel.send("Announcement sent!");
-
     } catch (error) {
-      message.channel.send("You didn't provide the required input in time. Please try again.");
+      message.channel.send(
+        "You didn't provide the required input in time. Please try again."
+      );
     }
   }
 });
-
 
 client.on("message", async (message) => {
   if (message.content === "-reactionroles") {
@@ -447,53 +480,51 @@ client.on("message", async (message) => {
       { name: "10th Grade", roleId: "1092233411214712913" },
       { name: "11th Grade", roleId: "1092233422056988752" },
       { name: "12th Grade", roleId: "1092233965202591756" },
-      { name: "College", roleId: "1092233983401656330"}
+      { name: "College", roleId: "1092233983401656330" },
     ];
 
     const embed = new Discord.MessageEmbed()
-      .setTitle("Customize your roles")
-      .setDescription(
-        "Select your timezone and grade level below to get the appropriate roles."
-      )
-      
-      .setColor("#0099ff")
-      .setFooter(
-        `Only select your timezone and grade level once.`,
-      );
+      .setDescription('**Customize your Roles**\nSelect your timezone and grade level below.')
 
-      const timezoneButtons = timezoneRoles.map((role) => {
-        return new MessageButton()
-          .setLabel(role.name)
-          .setStyle("PRIMARY")
-          .setID(`timezone_${role.roleId}`);
-      });
-  
-      const gradeLevelButtons = gradeLevelRoles.map((role) => {
-        return new MessageButton()
-          .setLabel(role.name)
-          .setStyle("PRIMARY")
-          .setID(`grade_${role.roleId}`);
-      });
-  
-      const timezoneActionRows = [];
-      const gradeLevelActionRows = [];
-  
-      for (let i = 0; i < timezoneButtons.length; i += 3) {
-        const row = new MessageActionRow().addComponents(timezoneButtons.slice(i, i + 3));
-        timezoneActionRows.push(row);
-      }
-  
-      for (let i = 0; i < gradeLevelButtons.length; i += 5) {
-        const row = new MessageActionRow().addComponents(gradeLevelButtons.slice(i, i + 5));
-        gradeLevelActionRows.push(row);
-      }
-  
-      await message.channel.send({
-        embed: embed,
-        components: [...timezoneActionRows, ...gradeLevelActionRows],
-      });
+      .setColor("#7289DA")
+
+    const timezoneButtons = timezoneRoles.map((role) => {
+      return new MessageButton()
+        .setLabel(role.name)
+        .setStyle("PRIMARY")
+        .setID(`timezone_${role.roleId}`);
+    });
+
+    const gradeLevelButtons = gradeLevelRoles.map((role) => {
+      return new MessageButton()
+        .setLabel(role.name)
+        .setStyle("PRIMARY")
+        .setID(`grade_${role.roleId}`);
+    });
+
+    const timezoneActionRows = [];
+    const gradeLevelActionRows = [];
+
+    for (let i = 0; i < timezoneButtons.length; i += 3) {
+      const row = new MessageActionRow().addComponents(
+        timezoneButtons.slice(i, i + 3)
+      );
+      timezoneActionRows.push(row);
     }
-  });
+
+    for (let i = 0; i < gradeLevelButtons.length; i += 5) {
+      const row = new MessageActionRow().addComponents(
+        gradeLevelButtons.slice(i, i + 5)
+      );
+      gradeLevelActionRows.push(row);
+    }
+
+    await message.channel.send({
+      embed: embed,
+      components: [...timezoneActionRows, ...gradeLevelActionRows],
+    });
+  }
+});
 client.on("clickButton", async (button) => {
   const [type, roleId] = button.id.split("_");
   const member = button.message.guild.members.cache.get(button.clicker.user.id);
@@ -521,13 +552,14 @@ client.on("message", async (message) => {
 
     // Check if the channel is in the specified category
     if (message.channel.parentID !== "1092229237580239033") {
-      return message.reply("This command can only be used in channels under the specified category.");
+      return message.reply(
+        "This command can only be used in channels under the specified category."
+      );
     }
 
     // Delete the channel
     message.channel.delete();
   }
 });
-
 
 client.login(process.env.TOKEN);
