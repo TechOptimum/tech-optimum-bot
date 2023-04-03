@@ -182,7 +182,10 @@ client.on("message", (message) => {
         role.name === "carl-bot" ||
         role.name === "Tech Optimum Test Bot" ||
         role.name === "Staff Member" ||
-        role.name === "Admin"
+        role.name === "Admin" ||
+        role.name === "*"||
+        role.name === "reminder-bot"
+        
       )
         return;
       let membersWithRole = message.guild.members.cache.filter((member) =>
