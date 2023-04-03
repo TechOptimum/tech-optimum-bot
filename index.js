@@ -79,7 +79,7 @@ client.on('guildMemberAdd', async member => {
   const executiveRoleId = '980269921982349372';
   const categoryId = '1092229237580239033';
 
-  const ticketName = `ticket-${member.user.username}`;
+  const ticketName = `verification-${member.user.username}`;
 
   const channel = await guild.channels.create(ticketName, {
     type: 'text',
@@ -507,6 +507,25 @@ client.on("clickButton", async (button) => {
       await member.roles.add(role);
       await button.reply.send(`Assigned the ${role.name} role.`, true);
     }
+  }
+});
+
+client.on("message", async (message) => {
+  // ... existing code for other commands ...
+
+  if (message.content === "-close") {
+    // Check if the user has admin permissions
+    if (!message.member.hasPermission("ADMINISTRATOR")) {
+      return message.reply("You don't have permission to use this command.");
+    }
+
+    // Check if the channel is in the specified category
+    if (message.channel.parentID !== "1092229237580239033") {
+      return message.reply("This command can only be used in channels under the specified category.");
+    }
+
+    // Delete the channel
+    message.channel.delete();
   }
 });
 
