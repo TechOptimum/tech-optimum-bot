@@ -484,9 +484,11 @@ client.on("message", async (message) => {
     ];
 
     const embed = new Discord.MessageEmbed()
-      .setDescription('**Customize your Roles**\nSelect your timezone and grade level below.')
+      .setDescription(
+        "**Customize your Roles**\nSelect your timezone and grade level below."
+      )
 
-      .setColor("#7289DA")
+      .setColor("#7289DA");
 
     const timezoneButtons = timezoneRoles.map((role) => {
       return new MessageButton()
@@ -559,6 +561,36 @@ client.on("message", async (message) => {
 
     // Delete the channel
     message.channel.delete();
+  }
+});
+client.on("message", (message) => {
+  if (message.content.startsWith("-add ")) {
+    const args = message.content.slice(5).trim().split(/ +/g);
+    const user =
+      message.mentions.members.first() ||
+      message.guild.members.cache.get(args[0]);
+
+    if (!user) {
+      message.channel.send(
+        "Invalid user. Please mention a user or provide a valid user ID."
+      );
+      return;
+    }
+
+    if (!message.channel.name.startsWith("ticket-")) {
+      message.channel.send("This command can only be used in ticket channels.");
+      return;
+    }
+
+    message.channel
+      .updateOverwrite(user, { VIEW_CHANNEL: true, SEND_MESSAGES: true })
+      .then(() => {
+        message.channel.send(`${user} has been added to this ticket.`);
+      })
+      .catch((error) => {
+        console.error(error);
+        message.channel.send("An error occurred while trying to add the user.");
+      });
   }
 });
 
